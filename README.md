@@ -9,10 +9,10 @@ pip install -r requirements.txt
 # Usage
 Windows:
 ```
-python detection.py <pano_picture> <result_picture>
+python detection.py <panorama_picture> <result_picture>
 ```
 
-pano_picture is the file path of the panorama picture you want to detect.
+panorama_picture is the file path of the panorama picture you want to detect (some examples can be found in datasets folder).
 
 result_picture is the output path for visualizion the result.
 

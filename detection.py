@@ -207,7 +207,7 @@ def main():
 
     for i in tqdm(range(4)):
         FOV = (180, 180)
-        output_image_size = (760, 760)
+        output_image_size = (640, 640)
         yaw_rotation = i * 90
         pitch_rotation = 90
         image_path = sys.argv[1]
