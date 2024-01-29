@@ -9,8 +9,8 @@ Usage:
 import sys
 import cv2
 import numpy as np
-from stereo import pano2stereo, realign_bbox
-from corrected_stereo import panorama_to_plane
+from BROKEN_PROJECTION_CODE import pano2stereo, realign_bbox
+from stereo import panorama_to_plane
 from PIL import Image
 from tqdm import tqdm
 
@@ -219,8 +219,6 @@ def main():
         output_name = file_name + "_stereographic-Face" + str(i) + ".jpg"
         output_image.save(output_name)
         output_image.show()
-
-    # projections = pano2stereo(input_pano)
 
     # output_frame = my_net.process_output(input_pano, projections)
     # cv2.imwrite(sys.argv[2], output_frame)
