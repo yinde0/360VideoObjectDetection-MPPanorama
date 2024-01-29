@@ -206,7 +206,12 @@ def main():
 
 
     for i in tqdm(range(4)):
-        output_image = panorama_to_plane(sys.argv[1], 180, (3040, 3040), i * 90, 90)
+        FOV = (180, 180)
+        output_image_size = (760, 760)
+        yaw_rotation = i * 90
+        pitch_rotation = 90
+        image_path = sys.argv[1]
+        output_image = panorama_to_plane(image_path, FOV, output_image_size, yaw_rotation, pitch_rotation)
         
         extension_passed = False
         file_name = ""

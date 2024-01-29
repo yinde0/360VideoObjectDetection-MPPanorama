@@ -6,17 +6,14 @@ from scipy.ndimage import map_coordinates
 # os.environ["IMAGEIO_FFMPEG_EXE"] = './ffmpeg'
 from tqdm import tqdm
 
-def map_to_sphere(x, y, z, yaw_radian, pitch_radian, distance=1.):
+def map_to_sphere(x, y, z, radius, yaw_radian, pitch_radian, distance=1.):
 
 
 
 
     theta = np.arccos(z / np.sqrt(x ** 2 + y ** 2 + z ** 2))
     phi = np.arctan2(y, x)
-
-    # The radius of the circle is the same distance as the distance of the plane from the xy plane
-    r = z
-    print("\n" + str(r) + " is the r value")
+    r = radius
 
     # Equations to get the original point before projected onto plane
     # This point is the intersection of the line through the points (0, 0, -R) (x_p, y_p, z_p) and the sphere x^2 + y^2 + z^2 = r^2
@@ -26,14 +23,10 @@ def map_to_sphere(x, y, z, yaw_radian, pitch_radian, distance=1.):
     x_circle = (4 * r ** 2) * x / denominator
     y_circle = (4 * r ** 2) * y / denominator
     z_circle = -r + (8 * r ** 3) / denominator
-    for val in x_circle[0]:
-        print(val)
 
     print_vals = np.sqrt(x_circle ** 2 + y_circle ** 2 + z_circle ** 2)
     theta = np.arccos(z_circle / np.sqrt(x_circle ** 2 + y_circle ** 2 + z_circle ** 2))
     phi = np.arctan2(y_circle, x_circle)
-    for val in z_circle[0]:
-        print(val)
 
 
     # Apply rotation transformations here
@@ -64,29 +57,39 @@ def panorama_to_plane(panorama_path, FOV, output_size, yaw, pitch):
     yaw_radian = np.radians(yaw)
     pitch_radian = np.radians(pitch)
 
+    Panorama_W_angle, Panorama_H_angle = FOV
     W, H = output_size
 
+    # Number of pixels covered by FOV angle in the panorama image
+    pano_pixel_W_range = int(pano_width * (Panorama_W_angle / 360))
+    pano_pixel_H_range = int(pano_height * (Panorama_H_angle / 180))
+    print("\n" + str(pano_pixel_W_range))
+    print("\n" + str(pano_pixel_H_range))
+    
+
+    # Step size for how much each output pixel changes relative to panorama pixel range
+    W_step_size = pano_pixel_W_range/ W
+    H_step_size = pano_pixel_H_range/ H 
+
     # Create arrays of length W and H, with values from 1 to W and 1 to H
-    u, v = np.meshgrid(np.arange(W), np.arange(H), indexing='xy')
+    u, v = np.rint(np.meshgrid(np.arange(pano_pixel_W_range, step=W_step_size), np.arange(pano_pixel_H_range, step=H_step_size), indexing='xy'))
 
     # Set array of x values from -W/2 to W/2 so that 0 is in center
-    x = u - W / 2
+    x = u - pano_pixel_W_range / 2
     # Set array of y values from -H/2 to H/2 so that 0 is in center
-    y = H / 2 - v
+    y = pano_pixel_H_range / 2 - v
     # z distance of plane to center of sphere (plane is parallel to xy-plane and assuming we will be using 180-degree stereographic projection)
-    z = W / 4
-    # print(str(z) + " is the z value")
+    z = pano_pixel_W_range / 4
+    # The radius of the sphere is the same distance as the distance of the plane from the xy plane
+    radius = z
 
-    theta, phi = map_to_sphere(x, y, z, yaw_radian, pitch_radian)
+    theta, phi = map_to_sphere(x, y, z, radius, yaw_radian, pitch_radian)
 
     U = phi * pano_width / (2 * np.pi)
     V = theta * pano_height / np.pi
 
     U, V = U.flatten(), V.flatten()
     coords = np.vstack((V, U))
-
-    print(theta)
-    print(phi)
 
     colors = interpolate_color(coords, pano_array)
     output_image = Image.fromarray(colors.reshape((H, W, 3)).astype('uint8'), 'RGB')
