@@ -1,16 +1,16 @@
 '''
 Object Detection on Panorama pictures
 Usage:
-    $ pyhton3 detection.py <pano_picture> <output_picture>
+    $ python detection.py <panorama_picture> <output_picture>
 
-    pano_picture(str)  : the pano pic file
-    output_picture(str): the result picture
+    panorama_picture(str):  the panorama pic file
+    output_picture(str):    the result picture
 '''
 import sys
 import cv2
 import numpy as np
 from BROKEN_PROJECTION_CODE import pano2stereo, realign_bbox
-from stereo import panorama_to_plane
+from stereo import panorama_to_stereo_multiprojections
 from PIL import Image
 from tqdm import tqdm
 
@@ -198,35 +198,35 @@ class Yolo():
 
 def main():
     '''
-    For testing now..
+    Function:
+    Take in a set of equirectangular panoramas (360 images) and apply object detection.
+    Split panorama into 4 images based on stereographic projection.
+    Run Yolov8 model finetuned with coco128 on each image to generate bounding boxes.
+    Draw bounding boxes back on panoramas.
+
+    Based on "Object Detection in Equirectangular Panorama".
+
+    Inputs:
+    System Arguments:
+    (1) input panorama image
+    (2) output file path to write panorama image with object detection bounding boxes
     '''
-    my_net = Yolo()
+    # my_net = Yolo()
 
-    input_pano = cv2.imread(sys.argv[1])
+    input_panorama_path = sys.argv[1]
+    output_image_size = (640, 640)
+    FOV = (180, 180)
 
+    output_file_path = sys.argv[2]
 
-    for i in tqdm(range(4)):
-        FOV = (180, 180)
-        output_image_size = (640, 640)
-        yaw_rotation = i * 90
-        pitch_rotation = 90
-        image_path = sys.argv[1]
-        output_image = panorama_to_plane(image_path, FOV, output_image_size, yaw_rotation, pitch_rotation)
-        
-        extension_passed = False
-        file_name = ""
-        for char in reversed(sys.argv[1]):
-            if extension_passed:
-                file_name = char + file_name
-            elif extension_passed == False and char == ".":
-                extension_passed = True
+    plane_frames = panorama_to_stereo_multiprojections(input_panorama_path, output_image_size, FOV)
 
-        output_name = file_name + "_stereographic-Face" + str(i) + ".jpg"
-        output_image.save(output_name)
-        output_image.show()
+    for frame in plane_frames:
+        print(frame.shape)
 
     # output_frame = my_net.process_output(input_pano, projections)
     # cv2.imwrite(sys.argv[2], output_frame)
 
 if __name__ == '__main__':
+
     main()

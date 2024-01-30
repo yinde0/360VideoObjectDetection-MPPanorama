@@ -1,30 +1,56 @@
-# import imageio
+
+'''
+
+Coordinate System:
+    coordinate system is defined as:
+    x -> south-direction axis
+    y -> zenith-direction axis
+    z -> west-direction axis
+    theta -> azimuth angle from positive z-axis
+    phi -> zenith angle from positive y-axis
+
+'''
+
 import numpy as np
 from PIL import Image
 from scipy.ndimage import map_coordinates
-# import os
-# os.environ["IMAGEIO_FFMPEG_EXE"] = './ffmpeg'
 from tqdm import tqdm
 
+
 def map_to_sphere(x, y, z, radius, yaw_radian, pitch_radian, distance=1.):
+    
+    '''
+    Function:
+    take input coordinates (x, y, z)
+    and find what coordinates on the sphere project
+    onto them using stereographic projection.
 
+    This means finding the points on the sphere defined by:
+        x^2 + y^2 + z^2 = radius^2
+    that are along the vector line passing through the points:
+        (0, 0, -R) and (x, y, z)
 
+    Input:
+    x, y, z -> 3 np.ndarrays input point coordinates
+    radius -> input radius of the sphere (this sphere is what will be used to wrap the panorama around)
+    yaw_radians -> how much to rotate around y axis
+    pitch_radians -> how much to rotate around z axis
 
+    Output:
+    3 np.ndarrays of coordinates in theta, phi to use to map pixel colors
+    from the panorama to the pixels in the output image
+    '''
 
-    theta = np.arccos(z / np.sqrt(x ** 2 + y ** 2 + z ** 2))
-    phi = np.arctan2(y, x)
     r = radius
 
     # Equations to get the original point before projected onto plane
     # This point is the intersection of the line through the points (0, 0, -R) (x_p, y_p, z_p) and the sphere x^2 + y^2 + z^2 = r^2
     denominator = x ** 2 + y ** 2 + 4 * (r ** 2)
-
-
     x_circle = (4 * r ** 2) * x / denominator
     y_circle = (4 * r ** 2) * y / denominator
     z_circle = -r + (8 * r ** 3) / denominator
 
-    print_vals = np.sqrt(x_circle ** 2 + y_circle ** 2 + z_circle ** 2)
+    # Calculate theta (azimuth angle) and phi (zenith angle) 
     theta = np.arccos(z_circle / np.sqrt(x_circle ** 2 + y_circle ** 2 + z_circle ** 2))
     phi = np.arctan2(y_circle, x_circle)
 
@@ -43,6 +69,23 @@ def map_to_sphere(x, y, z, radius, yaw_radian, pitch_radian, distance=1.):
 
 
 def interpolate_color(coords, img, method='bilinear'):
+    '''
+    Function:
+    Take input coordinates and use the input image to
+    get the color values at each coordinate
+    (interpolate color values between
+    coordinate values if necessary).
+
+    Input:
+    coords -> a np.ndarray of coordinates
+    img -> a np.ndarray of image color values
+    method (optional) -> type of interpolation
+
+    Output:
+    np.ndarray of color values of each related coordinate,
+    and an array shape of coords
+    '''
+
     order = {'nearest': 0, 'bilinear': 1, 'bicubic': 3}.get(method, 1)
     red = map_coordinates(img[:, :, 0], coords, order=order, mode='reflect')
     green = map_coordinates(img[:, :, 1], coords, order=order, mode='reflect')
@@ -51,6 +94,26 @@ def interpolate_color(coords, img, method='bilinear'):
 
 
 def panorama_to_plane(panorama_path, FOV, output_size, yaw, pitch):
+    '''
+    Function:
+    Take an input panorama image (360-degree),
+    a set Field of View, a file size in pixels-by-pixels for the output plane image,
+    and the rotational transformation yaw and pitch and get the
+    stereographic projection onto a plane tangeant to the sphere
+    created by the panorama.
+
+    Input:
+    panorama_path -> file path to panorama image
+    FOV -> (width-angle, height-angle) -> (based on theta from 0 to 360, based on phi from 0 to 180)
+    output_size -> (width-pixels, height-pixels)
+    yaw_radians -> how much to rotate around y axis
+    pitch_radians -> how much to rotate around z axis
+
+    Output:
+    np.ndarray of color values over the output plane image
+    with shape (height, width, 3) -> 3 for Red, Green, Blue
+    '''
+
     panorama = Image.open(panorama_path).convert('RGB')
     pano_width, pano_height = panorama.size
     pano_array = np.array(panorama)
@@ -63,8 +126,6 @@ def panorama_to_plane(panorama_path, FOV, output_size, yaw, pitch):
     # Number of pixels covered by FOV angle in the panorama image
     pano_pixel_W_range = int(pano_width * (Panorama_W_angle / 360))
     pano_pixel_H_range = int(pano_height * (Panorama_H_angle / 180))
-    print("\n" + str(pano_pixel_W_range))
-    print("\n" + str(pano_pixel_H_range))
     
 
     # Step size for how much each output pixel changes relative to panorama pixel range
@@ -91,10 +152,54 @@ def panorama_to_plane(panorama_path, FOV, output_size, yaw, pitch):
     U, V = U.flatten(), V.flatten()
     coords = np.vstack((V, U))
 
-    colors = interpolate_color(coords, pano_array)
-    output_image = Image.fromarray(colors.reshape((H, W, 3)).astype('uint8'), 'RGB')
+    output_image_array = interpolate_color(coords, pano_array)
 
-    return output_image
+    output_image_array = output_image_array.reshape((H, W, 3)).astype('uint8')
 
+    return output_image_array
+
+def panorama_to_stereo_multiprojections(panorama_path, output_image_size, FOV):
+    '''
+    Function:
+    Take a panorama image and convert it to 4 stereographic projections,
+    based on "Object Detection in Equirectangular Panorama" paper.
+
+    Input:
+    panorama_path -> file path to panorama image
+    FOV -> (width-angle, height-angle) -> (based on theta from 0 to 360, based on phi from 0 to 180)
+    output_image_size -> (width-pixels, height-pixels)
+    
+    Output:
+    an array of 4 stereographic projections
+    These projections are np.ndarrays with
+    shape (output_image_size.height, output_image_size.width, 3) -> 3 for Red, Green, Blue
+    '''
+
+    frames = []
+
+    for i in tqdm(range(4)):
+        yaw_rotation = i * 90
+        pitch_rotation = 90
+        W, H = output_image_size
+        output_image_array = panorama_to_plane(panorama_path, FOV, output_image_size, yaw_rotation, pitch_rotation)
+        
+
+        frames.append(output_image_array)
+
+        output_image = Image.fromarray(output_image_array.reshape((H, W, 3)).astype('uint8'), 'RGB')
+        
+        extension_passed = False
+        file_name = ""
+        for char in reversed(panorama_path):
+            if extension_passed:
+                file_name = char + file_name
+            elif extension_passed == False and char == ".":
+                extension_passed = True
+
+        output_name = file_name + "_stereographic-Face" + str(i) + ".jpg"
+        output_image.save(output_name)
+        output_image.show()
+
+    return frames
 
 
