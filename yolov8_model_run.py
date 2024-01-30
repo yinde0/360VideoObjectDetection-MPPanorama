@@ -16,14 +16,14 @@ def draw_bounding_box(img, class_id, confidence, x, y, x_plus_w, y_plus_h):
     """
     Draws bounding boxes on the input image based on the provided arguments.
 
-    Args:
-        img (numpy.ndarray): The input image to draw the bounding box on.
-        class_id (int): Class ID of the detected object.
-        confidence (float): Confidence score of the detected object.
-        x (int): X-coordinate of the top-left corner of the bounding box.
-        y (int): Y-coordinate of the top-left corner of the bounding box.
-        x_plus_w (int): X-coordinate of the bottom-right corner of the bounding box.
-        y_plus_h (int): Y-coordinate of the bottom-right corner of the bounding box.
+    Input:
+        img (numpy.ndarray) -> The input image to draw the bounding box on.
+        class_id (int) -> Class ID of the detected object.
+        confidence (float) -> Confidence score of the detected object.
+        x (int) -> X-coordinate of the top-left corner of the bounding box.
+        y (int) -> Y-coordinate of the top-left corner of the bounding box.
+        x_plus_w (int) -> X-coordinate of the bottom-right corner of the bounding box.
+        y_plus_h (int) -> Y-coordinate of the bottom-right corner of the bounding box.
     """
     label = f"{CLASSES[class_id]} ({confidence:.2f})"
     color = colors[class_id]
@@ -31,22 +31,23 @@ def draw_bounding_box(img, class_id, confidence, x, y, x_plus_w, y_plus_h):
     cv2.putText(img, label, (x - 10, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
 
-def main(onnx_model, input_image):
+def detect(input_array, onnx_model="model-runs\\detect\\train\\weights\\yolov8n.onnx"):
     """
-    Main function to load ONNX model, perform inference, draw bounding boxes, and display the output image.
+    Function:
+    Load ONNX model, perform inference, draw bounding boxes, and display the output image.
 
-    Args:
-        onnx_model (str): Path to the ONNX model.
-        input_image (str): Path to the input image.
+    Input:
+        onnx_model (str) -> Path to the ONNX model.
+        input_array (np.ndarray) -> Path to the input image.
 
-    Returns:
-        list: List of dictionaries containing detection information such as class_id, class_name, confidence, etc.
+    Output:
+        list -> List of dictionaries containing detection information such as class_id, class_name, confidence, etc.
     """
     # Load the ONNX model
     model: cv2.dnn.Net = cv2.dnn.readNetFromONNX(onnx_model)
 
     # Read the input image
-    original_image: np.ndarray = cv2.imread(input_image)
+    original_image = input_array
     [height, width, _] = original_image.shape
 
     # Prepare a square image for inference
@@ -127,4 +128,7 @@ if __name__ == "__main__":
     parser.add_argument("--model", default="model-runs\\detect\\train\\weights\\yolov8n.onnx", help="Input your ONNX model.")
     parser.add_argument("--img", default=str(ASSETS / "bus.jpg"), help="Path to input image.")
     args = parser.parse_args()
-    main(args.model, args.img)
+
+    original_image: np.ndarray = cv2.imread(args.img)
+    print(original_image.shape)
+    detect(original_image, args.model)

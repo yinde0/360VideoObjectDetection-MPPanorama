@@ -9,8 +9,8 @@ Usage:
 import sys
 import cv2
 import numpy as np
-from BROKEN_PROJECTION_CODE import pano2stereo, realign_bbox
-from stereo import panorama_to_stereo_multiprojections
+from yolov8_model_run import detect
+from stereo import panorama_to_stereo_multiprojections, stereo_bounding_boxes_to_panorama
 from PIL import Image
 from tqdm import tqdm
 
@@ -199,34 +199,47 @@ class Yolo():
 def main():
     '''
     Function:
-    Take in a set of equirectangular panoramas (360 images) and apply object detection.
-    Split panorama into 4 images based on stereographic projection.
-    Run Yolov8 model finetuned with coco128 on each image to generate bounding boxes.
-    Draw bounding boxes back on panoramas.
+        Take in a set of equirectangular panoramas (360 images) and apply object detection.
+        Split panorama into 4 images based on stereographic projection.
+        Run Yolov8 model finetuned with coco128 on each image to generate bounding boxes.
+        Draw bounding boxes back on panoramas.
 
-    Based on "Object Detection in Equirectangular Panorama".
+        Based on "Object Detection in Equirectangular Panorama".
 
     Inputs:
-    System Arguments:
-    (1) input panorama image
-    (2) output file path to write panorama image with object detection bounding boxes
+        System Arguments:
+            (1) input panorama image
+            (2) output file path to write panorama image with object detection bounding boxes
     '''
     # my_net = Yolo()
 
+    # Set variable values
     input_panorama_path = sys.argv[1]
     output_image_size = (640, 640)
     FOV = (180, 180)
-
     output_file_path = sys.argv[2]
 
-    plane_frames = panorama_to_stereo_multiprojections(input_panorama_path, output_image_size, FOV)
+    # Get frames along with (yaw, pitch) rotation value for the 4 stereographic projections for input panorama
+    frames = panorama_to_stereo_multiprojections(input_panorama_path, output_image_size, FOV)
 
-    for frame in plane_frames:
-        print(frame.shape)
+    # Get bounding boxes for each frame
+    detections_with_meta = []
+    for frame in frames:
+        print(frame)
+        detection = detect(frame['image'])
+        detection_with_meta = (detection, frame['yaw'], frame['pitch'])
+        detections_with_meta.append(detection_with_meta)
+
+    print(detections_with_meta)
+    
+    output_panorama = stereo_bounding_boxes_to_panorama(detections_with_meta, input_panorama_path)
+
+
+
+    
 
     # output_frame = my_net.process_output(input_pano, projections)
     # cv2.imwrite(sys.argv[2], output_frame)
 
 if __name__ == '__main__':
-
     main()

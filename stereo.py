@@ -21,24 +21,24 @@ def map_to_sphere(x, y, z, radius, yaw_radian, pitch_radian, distance=1.):
     
     '''
     Function:
-    take input coordinates (x, y, z)
-    and find what coordinates on the sphere project
-    onto them using stereographic projection.
+        take input coordinates (x, y, z)
+        and find what coordinates on the sphere project
+        onto them using stereographic projection.
 
-    This means finding the points on the sphere defined by:
-        x^2 + y^2 + z^2 = radius^2
-    that are along the vector line passing through the points:
-        (0, 0, -R) and (x, y, z)
+        This means finding the points on the sphere defined by:
+            x^2 + y^2 + z^2 = radius^2
+        that are along the vector line passing through the points:
+            (0, 0, -R) and (x, y, z)
 
     Input:
-    x, y, z -> 3 np.ndarrays input point coordinates
-    radius -> input radius of the sphere (this sphere is what will be used to wrap the panorama around)
-    yaw_radians -> how much to rotate around y axis
-    pitch_radians -> how much to rotate around z axis
+        x, y, z (np.ndarray, np.ndarray, np.ndarray) -> 3 np.ndarrays input point coordinates
+        radius (float) -> input radius of the sphere (this sphere is what will be used to wrap the panorama around)
+        yaw_radians (float) -> how much to rotate around y axis
+        pitch_radians (float) -> how much to rotate around z axis
 
     Output:
-    3 np.ndarrays of coordinates in theta, phi to use to map pixel colors
-    from the panorama to the pixels in the output image
+        theta, phi -> 2 np.ndarrays of coordinates in theta, phi to use
+        to map pixel colors from the panorama to the pixels in the output image
     '''
 
     r = radius
@@ -71,19 +71,19 @@ def map_to_sphere(x, y, z, radius, yaw_radian, pitch_radian, distance=1.):
 def interpolate_color(coords, img, method='bilinear'):
     '''
     Function:
-    Take input coordinates and use the input image to
-    get the color values at each coordinate
-    (interpolate color values between
-    coordinate values if necessary).
+        Take input coordinates and use the input image to
+        get the color values at each coordinate
+        (interpolate color values between
+        coordinate values if necessary).
 
     Input:
-    coords -> a np.ndarray of coordinates
-    img -> a np.ndarray of image color values
-    method (optional) -> type of interpolation
+        coords (np.ndarray) -> a np.ndarray of coordinates
+        img (np.ndarray) -> a np.ndarray of image color values
+        method (str/int: optional) -> type of interpolation
 
     Output:
-    np.ndarray of color values of each related coordinate,
-    and an array shape of coords
+        np.ndarray of color values of each related coordinate,
+        and an array shape of coords
     '''
 
     order = {'nearest': 0, 'bilinear': 1, 'bicubic': 3}.get(method, 1)
@@ -96,22 +96,22 @@ def interpolate_color(coords, img, method='bilinear'):
 def panorama_to_plane(panorama_path, FOV, output_size, yaw, pitch):
     '''
     Function:
-    Take an input panorama image (360-degree),
-    a set Field of View, a file size in pixels-by-pixels for the output plane image,
-    and the rotational transformation yaw and pitch and get the
-    stereographic projection onto a plane tangeant to the sphere
-    created by the panorama.
+        Take an input panorama image (360-degree),
+        a set Field of View, a file size in pixels-by-pixels for the output plane image,
+        and the rotational transformation yaw and pitch and get the
+        stereographic projection onto a plane tangeant to the sphere
+        created by the panorama.
 
     Input:
-    panorama_path -> file path to panorama image
-    FOV -> (width-angle, height-angle) -> (based on theta from 0 to 360, based on phi from 0 to 180)
-    output_size -> (width-pixels, height-pixels)
-    yaw_radians -> how much to rotate around y axis
-    pitch_radians -> how much to rotate around z axis
+        panorama_path (str) -> file path to panorama image
+        FOV (float, float) -> (width-angle, height-angle) -> (based on theta from 0 to 360, based on phi from 0 to 180)
+        output_size (int, int) -> (width-pixels, height-pixels)
+        yaw_radians (float) -> how much to rotate around y axis
+        pitch_radians (float) -> how much to rotate around z axis
 
     Output:
-    np.ndarray of color values over the output plane image
-    with shape (height, width, 3) -> 3 for Red, Green, Blue
+        output_image_array -> np.ndarray of color values over the output plane
+        image with shape (height, width, 3) -> 3 for Red, Green, Blue
     '''
 
     panorama = Image.open(panorama_path).convert('RGB')
@@ -161,21 +161,22 @@ def panorama_to_plane(panorama_path, FOV, output_size, yaw, pitch):
 def panorama_to_stereo_multiprojections(panorama_path, output_image_size, FOV):
     '''
     Function:
-    Take a panorama image and convert it to 4 stereographic projections,
-    based on "Object Detection in Equirectangular Panorama" paper.
+        Take a panorama image and convert it to 4 stereographic projections,
+        based on "Object Detection in Equirectangular Panorama" paper.
 
     Input:
-    panorama_path -> file path to panorama image
-    FOV -> (width-angle, height-angle) -> (based on theta from 0 to 360, based on phi from 0 to 180)
-    output_image_size -> (width-pixels, height-pixels)
+        panorama_path (str) -> file path to panorama image
+        FOV (float, float) -> (width-angle, height-angle) -> (based on theta from 0 to 360, based on phi from 0 to 180)
+        output_image_size (int, int) -> (width-pixels, height-pixels)
     
     Output:
-    an array of 4 stereographic projections
-    These projections are np.ndarrays with
-    shape (output_image_size.height, output_image_size.width, 3) -> 3 for Red, Green, Blue
+        frames_with_meta_np -> a np.ndarray with 4 tuples for each projection:
+            (1) an np.ndarray of a stereographic projection plane with shape:
+            (output_image_size.height, output_image_size.width, 3) -> 3 for Red, Green, Blue
+            (2) its associated yaw and pitch rotations
     '''
 
-    frames = []
+    frames_with_meta = []
 
     for i in tqdm(range(4)):
         yaw_rotation = i * 90
@@ -183,8 +184,8 @@ def panorama_to_stereo_multiprojections(panorama_path, output_image_size, FOV):
         W, H = output_image_size
         output_image_array = panorama_to_plane(panorama_path, FOV, output_image_size, yaw_rotation, pitch_rotation)
         
-
-        frames.append(output_image_array)
+        frame_with_meta = (output_image_array, yaw_rotation, pitch_rotation)
+        frames_with_meta.append(frame_with_meta)
 
         output_image = Image.fromarray(output_image_array.reshape((H, W, 3)).astype('uint8'), 'RGB')
         
@@ -199,7 +200,17 @@ def panorama_to_stereo_multiprojections(panorama_path, output_image_size, FOV):
         output_name = file_name + "_stereographic-Face" + str(i) + ".jpg"
         output_image.save(output_name)
         output_image.show()
+    
 
-    return frames
+    frames_with_meta_np = np.array(frames_with_meta, dtype=np.dtype([('image', np.ndarray), ('yaw', int), ('pitch', int)]))
+
+    print(frames_with_meta_np.shape)
+
+    return frames_with_meta_np
+
+def stereo_bounding_boxes_to_panorama(detections_with_meta, panorama_path):
+    
+    pass
+
 
 
