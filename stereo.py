@@ -275,13 +275,13 @@ def stereo_bounding_boxes_to_panorama(frame_detections_with_meta, panorama_path,
             scale = detection['scale']
 
             # Get box coordinates for x (x, x + w) and y (y, y + h) from the stereographic image
-            box_coord_x = round((box[0] * scale + (box[0] + box[2]) * scale) / 2)
-            box_coord_y = round((box[1] * scale + (box[1] + box[3]) * scale) / 2)
+            box_coord_x = np.array([(box[0] * scale), (box[0] + box[2]) * scale])
+            box_coord_y = np.array([(box[1] * scale), (box[1] + box[3]) * scale])
             
             
-            print("Box center coordinate x:")
+            print("Box coordinates for x:")
             print(box_coord_x)
-            print("Box center coordinate y:")
+            print("Box coordinates for y:")
             print(box_coord_y)
 
             # Get the stereographic projection plane coordinates from the stereographic image
@@ -290,9 +290,14 @@ def stereo_bounding_boxes_to_panorama(frame_detections_with_meta, panorama_path,
 
             # Set array of y values from -H/2 to H/2 so that 0 is in center of plane
             y_plane = pano_pixel_H_range / 2 - box_coord_y * (H_step_size)
+
+            x_grid, y_grid = np.meshgrid(x_plane, y_plane, indexing="xy")
             
-            x_array.append(x_plane)
-            y_array.append(y_plane)
+            print("X grid: ", x_grid)
+            print("Y grid: ", y_grid)
+
+            x_array.append(x_grid)
+            y_array.append(y_grid)
 
         print("Frame detection yaw: " + str(frame_detections['yaw']))
         print("Frame detection pitch: " + str(frame_detections['pitch']))
@@ -322,37 +327,29 @@ def stereo_bounding_boxes_to_panorama(frame_detections_with_meta, panorama_path,
             class_id = frame_detection['class_id']
             confidence = frame_detection['confidence']
 
-            draw_bounding_box(
-                pano_array,
-                class_id,
-                confidence,
-                round(U[0] - 20),
-                round(V[0] - 20),
-                round(U[0] + 20),
-                round(V[0] + 20),
-            )
+            for j in range(len(U)):
 
-            # Take the smallest x and y value for top left corner and largest x and y value for the bottom right corner 
-            x = min(U)
-            y = min(V)
-            x_plus_w = max(U)
-            y_plus_h = max(V)
+                # Take the smallest x and y value for top left corner and largest x and y value for the bottom right corner 
+                x_pano = min(U)
+                y_pano = min(V)
+                x_plus_w_pano = max(U)
+                y_plus_h_pano = max(V)
 
-            # Round to nearest integer for convert for pixels
-            x = round(x)
-            y = round(y)
-            x_plus_w = round(x_plus_w)
-            y_plus_h = round(y_plus_h)
+                # Round to nearest integer for convert for pixels
+                x_pano = round(x_pano)
+                y_pano = round(y_pano)
+                x_plus_w_pano = round(x_plus_w_pano)
+                y_plus_h_pano = round(y_plus_h_pano)
 
-            # draw_bounding_box(
-            #     pano_array,
-            #     class_id,
-            #     confidence,
-            #     x,
-            #     y,
-            #     x_plus_w,
-            #     y_plus_h,
-            # )
+                draw_bounding_box(
+                    pano_array,
+                    class_id,
+                    confidence,
+                    x_pano,
+                    y_pano,
+                    x_plus_w_pano,
+                    y_plus_h_pano,
+                )
 
     # Return the final annotated pano_array
     return pano_array
