@@ -309,7 +309,7 @@ def soft_nms(pano_detections_with_meta, sigma_one=0.3, sigma_two=0.6, IoU_minimu
                         break
             
         if detection_i not in indices_to_remove:
-            pano_detections_post_nms.append(detection) 
+            pano_detections_post_nms.append(detection)
 
 
     pano_detections_post_nms = np.array(pano_detections_post_nms, dtype=np.dtype([('pano_detection', object)]))
@@ -328,7 +328,7 @@ def stereo_bounding_boxes_to_panorama(frame_detections_with_meta, panorama_path,
         detections_with_meta (np.ndarray of tuple with (np.ndarray, (int, int), int, int)):
             (bounding boxes, (stereographic image width, height), yaw, pitch))
             -> bounding boxes info (see yolov8 model run), the height and width in pixels
-            of the image used in detections, and the yaw and pitch of frame used in detections.
+            of the image used in detections, and the yaw and pitch of frame used in detections. 
         panorama_path (str): file path to panorama image
         stereographic_image_size (int, int): (pixel_W_size, pixel_H_size)
         FOV (int, int): (W_angle, H_angle)
@@ -412,14 +412,17 @@ def stereo_bounding_boxes_to_panorama(frame_detections_with_meta, panorama_path,
             elif V[0] < (V[1] - pano_height / 2):
                 V[0] += pano_height
 
-            if U[1] < U[0] or U[1] < U[2]:
+            if U[1] < U[0] - pano_width / 4 or U[1] < U[2] - pano_width / 4:
                 U[1] += pano_width
-            if U[3] < U[0] or U[3] < U[2]:
+            if U[3] < U[0] - pano_width / 4 or U[3] < U[2] - pano_width / 4:
                 U[3] += pano_width
-            if V[2] < V[0] or V[2] < V[1]:
+            if V[2] < V[0] - pano_height / 4 or V[2] < V[1] - pano_height / 4:
                 V[2] += pano_height
-            if V[3] < V[0] or V[3] < V[1]:
+            if V[3] < V[0] - pano_height / 4 or V[3] < V[1] - pano_height / 4:
                 V[2] += pano_height
+
+            print("U: ", U)
+            print("V: ", V)
 
             # Take the smallest x and y value for top left corner and largest x and y value for the bottom right corner
             x_pano = min([U[0], U[2]])
