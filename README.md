@@ -9,12 +9,22 @@ pip install -r requirements.txt
 # Usage
 Windows:
 ```
-python detection.py <panorama_picture> <result_picture>
+python detection.py --video <input_file> --output <output_file>
 ```
 
-panorama_picture is the file path of the panorama picture you want to detect (some examples can be found in datasets folder).
+input_file (str):  the input 360-degree video you want to run object detection on.
 
-result_picture is the output path for visualizion the result.
+output_file (str): the output 360-degree video with bounding boxes (some examples can be found in datasets folder).
+
+```
+python detection.py --img <input_file> --output <output_file>
+```
+input_file (str):  the input 360-degree image you want to run object detection on (some examples can be found in datasets folder).
+
+output_file (str): the output 360-degree image with bounding boxes.
+
+Stable version with on .mp4 and .mp3 files.
+
 
 # License
 This repository is released under the MIT License (refer to the LICENSE file for details).

@@ -12,9 +12,8 @@ Coordinate System:
 '''
 
 import numpy as np
-from PIL import Image
+import cv2
 from scipy.ndimage import map_coordinates
-from tqdm import tqdm
 from draw_boxes import draw_bounding_box
 
 
@@ -95,7 +94,7 @@ def interpolate_color(coords, img, method='bilinear'):
     return np.stack((red, green, blue), axis=-1)
 
 
-def panorama_to_plane(panorama_path, FOV, output_size, yaw, pitch):
+def panorama_to_plane(pano_array, FOV, output_size, yaw, pitch):
     '''
     Function:
         Take an input panorama image (360-degree),
@@ -105,7 +104,7 @@ def panorama_to_plane(panorama_path, FOV, output_size, yaw, pitch):
         created by the panorama.
 
     Input:
-        panorama_path (str): file path to panorama image
+        pano_array (np.ndarray): panorama pixel values arranged in an np.ndarray with shape (pano_height, pano_width, 3) -> 3 for RGB.
         FOV (float, float): (width-angle, height-angle) -> (based on theta from 0 to 360, based on phi from 0 to 180)
         output_size (int, int): (width-pixels, height-pixels)
         yaw_radians (float): how much to rotate around y axis
@@ -116,15 +115,13 @@ def panorama_to_plane(panorama_path, FOV, output_size, yaw, pitch):
         image with shape (height, width, 3): 3 for Red, Green, Blue
     '''
 
-    # Open panorama and get info about its size in pixels
-    panorama = Image.open(panorama_path).convert('RGB')
-    pano_width, pano_height = panorama.size
-    pano_array = np.array(panorama)
+    # Get info about its size in pixels
+    pano_width = pano_array.shape[1]
+    pano_height = pano_array.shape[0]
 
     # Convert to radians for numpy math
     yaw_radian = np.radians(yaw)
     pitch_radian = np.radians(pitch)
-    print(panorama_path)
 
     # Get FOV angles and size of output in pixels
     Panorama_W_angle, Panorama_H_angle = FOV
@@ -170,14 +167,14 @@ def panorama_to_plane(panorama_path, FOV, output_size, yaw, pitch):
 
     return output_image_array
 
-def panorama_to_stereo_multiprojections(panorama_path, stereographic_image_size, FOV):
+def panorama_to_stereo_multiprojections(pano_array, stereographic_image_size, FOV):
     '''
     Function:
         Take a panorama image and convert it to 4 stereographic projections,
         based on "Object Detection in Equirectangular Panorama" paper.
 
     Input:
-        panorama_path (str): file path to panorama image
+        pano_array (np.ndarray): panorama pixel values arranged in an np.ndarray with shape (pano_height, pano_width, 3) -> 3 for RGB.
         FOV (float, float): (width-angle, height-angle) -> (based on theta from 0 to 360, based on phi from 0 to 180)
         output_image_size (int, int): (width-pixels, height-pixels)
     
@@ -190,28 +187,22 @@ def panorama_to_stereo_multiprojections(panorama_path, stereographic_image_size,
 
     frames_with_meta = []
 
-    for i in tqdm(range(4)):
+    for i in range(4):
         yaw_rotation = i * 90
         pitch_rotation = 90
         W, H = stereographic_image_size
-        output_image_array = panorama_to_plane(panorama_path, FOV, stereographic_image_size, yaw_rotation, pitch_rotation)
-        
+        output_image_array = panorama_to_plane(pano_array, FOV, stereographic_image_size, yaw_rotation, pitch_rotation)
+
         frame_with_meta = (output_image_array, yaw_rotation, pitch_rotation)
         frames_with_meta.append(frame_with_meta)
 
-        output_image = Image.fromarray(output_image_array.reshape((H, W, 3)).astype('uint8'), 'RGB')
-        
-        extension_passed = False
-        file_name = ""
-        for char in reversed(panorama_path):
-            if extension_passed:
-                file_name = char + file_name
-            elif extension_passed == False and char == ".":
-                extension_passed = True
-
-        output_name = file_name + "_stereographic-Face" + str(i) + ".jpg"
-        output_image.save(output_name)
-        output_image.show()
+        '''
+        For testing purposes to show the output stereographic projected image
+        '''
+        # reformatted_output = output_image_array.reshape((H, W, 3)).astype('uint8')
+        # cv2.imshow("output image", reformatted_output)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
     
 
     frames_with_meta_np = np.array(frames_with_meta, dtype=np.dtype([('image', np.ndarray), ('yaw', int), ('pitch', int)]))
@@ -290,15 +281,17 @@ def soft_nms(pano_detections_with_meta, sigma_one=0.3, sigma_two=0.6, IoU_minimu
                     # Based on equation in paper
                     rescore = confidence * np.exp(-1 * ((IoU ** 2)/sigma_one + (distance ** 2)/sigma_two))
 
+                    compared_confidence = compared_detection['confidence']
+                    compared_distance = compared_detection['dist_from_center']
+                    compared_rescore = compared_confidence * np.exp(-1 * ((IoU ** 2)/sigma_one + (compared_distance ** 2)/sigma_two))
+
+                    '''
                     # Print for testing
                     print("detection: ", detection)
                     print("compared detection: ", compared_detection)
                     print("rescore for detection: ", rescore)
-
-                    compared_confidence = compared_detection['confidence']
-                    compared_distance = compared_detection['dist_from_center']
-                    compared_rescore = compared_confidence * np.exp(-1 * ((IoU ** 2)/sigma_one + (compared_distance ** 2)/sigma_two))
                     print("rescore for compared detection: ", compared_rescore)
+                    '''
 
                     # If detection is better than compared, then add compared to discard pile
                     if rescore >= compared_rescore:
@@ -316,7 +309,7 @@ def soft_nms(pano_detections_with_meta, sigma_one=0.3, sigma_two=0.6, IoU_minimu
 
     return pano_detections_post_nms
 
-def stereo_bounding_boxes_to_panorama(frame_detections_with_meta, panorama_path, stereographic_image_size, FOV):
+def stereo_bounding_boxes_to_panorama(frame_detections_with_meta, panorama, stereographic_image_size, FOV):
 
     '''
     Function:
@@ -329,7 +322,7 @@ def stereo_bounding_boxes_to_panorama(frame_detections_with_meta, panorama_path,
             (bounding boxes, (stereographic image width, height), yaw, pitch))
             -> bounding boxes info (see yolov8 model run), the height and width in pixels
             of the image used in detections, and the yaw and pitch of frame used in detections. 
-        panorama_path (str): file path to panorama image
+        pano_array (np.ndarray): panorama pixel values arranged in an np.ndarray with shape (pano_height, pano_width, 3) -> 3 for RGB.
         stereographic_image_size (int, int): (pixel_W_size, pixel_H_size)
         FOV (int, int): (W_angle, H_angle)
     
@@ -337,9 +330,12 @@ def stereo_bounding_boxes_to_panorama(frame_detections_with_meta, panorama_path,
         annotated_panorama (np.ndarray): The output panorama with annotated bounding boxes
     '''
 
-    panorama = Image.open(panorama_path).convert('RGB')
-    pano_width, pano_height = panorama.size
-    pano_array = np.array(panorama)
+    # Create copy of panorama to avoid overwriting values on 'panorama'
+    pano_array = np.copy(panorama)
+
+    # Get the size of the panorama in pixels
+    pano_width = pano_array.shape[1]
+    pano_height = pano_array.shape[0]
 
     Panorama_W_angle, Panorama_H_angle = FOV
     W, H = stereographic_image_size
@@ -421,9 +417,6 @@ def stereo_bounding_boxes_to_panorama(frame_detections_with_meta, panorama_path,
             if V[3] < V[0] - pano_height / 4 or V[3] < V[1] - pano_height / 4:
                 V[2] += pano_height
 
-            print("U: ", U)
-            print("V: ", V)
-
             # Take the smallest x and y value for top left corner and largest x and y value for the bottom right corner
             x_pano = min([U[0], U[2]])
             y_pano = min([V[0], V[1]])
@@ -449,7 +442,6 @@ def stereo_bounding_boxes_to_panorama(frame_detections_with_meta, panorama_path,
     
     pano_detections_with_meta = np.array(pano_detections_with_meta, dtype=np.dtype([('pano_detection', object)]))
 
-    print("Detections in the panorama")
 
     # Apply Soft Non-Max Suppression on each detection
     pano_detections_post_nms = soft_nms(pano_detections_with_meta)
@@ -458,7 +450,6 @@ def stereo_bounding_boxes_to_panorama(frame_detections_with_meta, panorama_path,
     for frame_index in range(pano_detections_post_nms.shape[0]):
         pano_detection = pano_detections_post_nms[frame_index]['pano_detection']
 
-        print(pano_detection)
 
         # box -> {x, y, width, height}
         box = pano_detection['box']

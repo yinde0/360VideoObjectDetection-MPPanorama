@@ -8,6 +8,7 @@ import numpy as np
 from ultralytics.utils import ASSETS, yaml_load
 from ultralytics.utils.checks import check_yaml
 from draw_boxes import draw_bounding_box
+from PIL import Image
 
 CLASSES = yaml_load(check_yaml("coco128.yaml"))["names"]
 colors = np.random.uniform(0, 255, size=(len(CLASSES), 3))
@@ -98,9 +99,12 @@ def detect(input_array, onnx_model="model-runs\\detect\\train\\weights\\yolov8n.
         )
 
     # Display the image with bounding boxes
-    cv2.imshow("image", original_image)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    '''
+    For testing purposes to show the bounding boxes on the stereographic projected image
+    '''
+    # cv2.imshow("image with detections", original_image)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
 
     return detections
 
@@ -109,8 +113,16 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default="model-runs\\detect\\train\\weights\\yolov8n.onnx", help="Input your ONNX model.")
     parser.add_argument("--img", help="Path to input image.")
+    parser.add_argument("--output", help="Path to output image.", default=None)
     args = parser.parse_args()
 
     original_image: np.ndarray = cv2.imread(args.img)
     print(original_image.shape)
     detect(original_image, args.model)
+    if args.output:
+        image_height = original_image.shape[0]
+        image_width = original_image.shape[1]        
+
+        output_image = Image.fromarray(original_image.reshape((image_height, image_width, 3)).astype('uint8'), 'RGB')
+        
+        cv2.imwrite(args.output)
