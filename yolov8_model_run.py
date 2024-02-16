@@ -14,7 +14,7 @@ CLASSES = yaml_load(check_yaml("coco128.yaml"))["names"]
 colors = np.random.uniform(0, 255, size=(len(CLASSES), 3))
 
 
-def detect(input_array, onnx_model="model-runs\\detect\\train\\weights\\yolov8n.onnx"):
+def detect(input_array, confidence_threshold=0.40, onnx_model="model-runs\\detect\\train\\weights\\yolov8n.onnx"):
     """
     Function:
     Load ONNX model, perform inference, draw bounding boxes, and display the output image.
@@ -60,7 +60,7 @@ def detect(input_array, onnx_model="model-runs\\detect\\train\\weights\\yolov8n.
     for i in range(rows):
         classes_scores = outputs[0][i][4:]
         (minScore, maxScore, minClassLoc, (x, maxClassIndex)) = cv2.minMaxLoc(classes_scores)
-        if maxScore >= 0.25:
+        if maxScore >= confidence_threshold:
             box = [
                 outputs[0][i][0] - (0.5 * outputs[0][i][2]),
                 outputs[0][i][1] - (0.5 * outputs[0][i][3]),

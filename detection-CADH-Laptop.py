@@ -13,12 +13,11 @@ import queue
 
 import sys
 import cv2
-import imageio
 import numpy as np
 from yolov8_model_run import detect
 from stereo import panorama_to_stereo_multiprojections, stereo_bounding_boxes_to_panorama
 from tqdm import tqdm
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 
@@ -52,13 +51,12 @@ def video_detection(input_video_path, stereographic_image_size, FOV, output_file
 
     fps = video_reader.get(cv2.CAP_PROP_FPS)
     total_num_frames = video_reader.get(cv2.CAP_PROP_FRAME_COUNT)
-    # Testing
-    total_num_frames = 300
     print("Frame Rate: ", fps)
     print("Total number of frames: ", total_num_frames)
 
 
     def process_frame(frame_count, pano_array, stereographic_image_size, FOV):
+        print("Processing frame: ", frame_count)
         
         # Get frames along with (yaw, pitch) rotation value for the 4 stereographic projections for input panorama
         frames = panorama_to_stereo_multiprojections(pano_array, stereographic_image_size, FOV)
@@ -67,19 +65,10 @@ def video_detection(input_video_path, stereographic_image_size, FOV, output_file
         frames_detections_with_meta = []
         for frame in frames:
             # detections contains all YOLOv8 'detections' within the current frame
-            detections = detect(frame['image'], confidence_threshold=0.45)
-
-            # Remove detections whose boxes are close to the edge of the frame
-            cleaned_detections = []
-
-            for detection in detections:
-                box = detection['box']
-                if not(box[0] < 5 or box[1] < 5 or box[0] + box[2] > frame['image'].shape[0] - 5 or box[1] + box[3] > frame['image'].shape[1] - 5):
-                    cleaned_detections.append(detection)
-
+            detections = detect(frame['image'])
 
             # Add meta data about the yaw and pitch rotations of the frame to derive the image
-            detections_with_meta = (cleaned_detections, frame['yaw'], frame['pitch'])
+            detections_with_meta = (detections, frame['yaw'], frame['pitch'])
             # Append the frame detections with meta data to the list of frames
             frames_detections_with_meta.append(detections_with_meta)
 
@@ -88,9 +77,10 @@ def video_detection(input_video_path, stereographic_image_size, FOV, output_file
         
         # Add the bounding boxes from the stereographic projection frames to the original panorama and return the annotated np.ndarray
         output_panorama_np = stereo_bounding_boxes_to_panorama(frames_detections_with_meta_np, pano_array, stereographic_image_size, FOV)
+        annotated_panoramas[frame_count] = output_panorama_np
 
         # Successful return
-        return (output_panorama_np, frame_count, 0)
+        return 0
 
 
     # if only one thread, run it on the current thread without using the multithread manager
@@ -100,12 +90,9 @@ def video_detection(input_video_path, stereographic_image_size, FOV, output_file
             if ret is None:
                 print("Finished reading all frames before expected")
                 break
-
-            output_panorama_np, fr_index, code = process_frame(frame_count, pano_array, stereographic_image_size, FOV)
-            if code != 0:
-                print(f"Task failed, code: {code}")
-            else:
-                annotated_panoramas[fr_index] = output_panorama_np
+            result_code = process_frame(frame_count, pano_array, stereographic_image_size, FOV)
+            if result_code != 0:
+                break
     
     # Otherwise, run it with the multithread manager
     elif thread_count > 1:
@@ -122,38 +109,31 @@ def video_detection(input_video_path, stereographic_image_size, FOV, output_file
                 futures.put(future)
                 while futures.qsize() > thread_count * 2:
                     future = futures.get()
-                    output_panorama_np, fr_index, code = future.result()  # This line will block until the future is done
-                    if code != 0:
-                        print(f"Task failed, code: {code}")
-                    else:
-                        annotated_panoramas[fr_index] = output_panorama_np
+                    result = future.result()  # This line will block until the future is done
+                    print(f"Task returned: {result}")
+
+            # handle task results (possible errors) after all have been queued
+            for future in as_completed(futures):
+                result = future.result()  # This line will block until the future is done
+                print(f"Task returned: {result}")
     
-    while futures.qsize() > 0:
-        future = futures.get()
-        output_panorama_np, fr_index, code = future.result()  # This line will block until the future is done
-        print(output_panorama_np.shape)
-        if code != 0:
-            print(f"Task failed, code: {code}")
-        else:
-            annotated_panoramas[fr_index] = output_panorama_np
 
     # Release video reader object
     video_reader.release()
 
     # Store the panorama image with bounding boxes
     if output_file_path:
+        
         # Defining codec and creating video_writer object
-        # fourcc = cv2.VideoWriter_fourcc(*'X264')
-        # video_writer = cv2.VideoWriter(output_file_path, fourcc, int(fps), (annotated_panoramas[0].shape[1], annotated_panoramas[0].shape[0]))
-        video_writer = imageio.get_writer('output.mp4', fps=int(fps))
+        fourcc = cv2.VideoWriter_fourcc(*'MP4V')
+        video_writer = cv2.VideoWriter(output_file_path, fourcc, fps, (annotated_panoramas.shape[1], annotated_panoramas.shape[0]))
 
         # Write each frame in annotated_panoramas to the video file
-        for i in range(int(total_num_frames)):
-            output_image = annotated_panoramas[i]
+        for output_image in annotated_panoramas:
             video_writer.write(output_image)
 
         # Close the video_writer object when finished
-        video_writer.close()
+        video_writer.release()
         print("The annotated 360 video file has been written successfully.")
 
 
@@ -193,16 +173,7 @@ def image_detection(input_panorama_path, stereographic_image_size, FOV, output_f
     frames_detections_with_meta = []
     for frame in frames:
         # detections contains all YOLOv8 'detections' within the current frame
-        detections = detect(frame['image'], confidence_threshold=0.45)
-
-        # Remove detections whose boxes are close to the edge of the frame
-        cleaned_detections = []
-
-        for detection in detections:
-            box = detection['box']
-            if not (box[0] < 5 or box[1] < 5 or box[0] + box[2] > frame['image'].shape[0] - 5 or box[1] + box[3] > frame['image'].shape[1] - 5):
-                cleaned_detections.append(detection)
-
+        detections = detect(frame['image'])
 
         # Add meta data about the yaw and pitch rotations of the frame to derive the image
         detections_with_meta = (detections, frame['yaw'], frame['pitch'])
