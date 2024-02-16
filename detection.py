@@ -143,9 +143,9 @@ def video_detection(input_video_path, stereographic_image_size, FOV, output_file
     # Store the panorama image with bounding boxes
     if output_file_path:
         # Defining codec and creating video_writer object
-        # fourcc = cv2.VideoWriter_fourcc(*'X264')
-        # video_writer = cv2.VideoWriter(output_file_path, fourcc, int(fps), (annotated_panoramas[0].shape[1], annotated_panoramas[0].shape[0]))
-        video_writer = imageio.get_writer('output.mp4', fps=int(fps))
+        fourcc = cv2.VideoWriter_fourcc(*'X264')
+        video_writer = cv2.VideoWriter(output_file_path, fourcc, int(fps), (annotated_panoramas[0].shape[1], annotated_panoramas[0].shape[0]))
+        # video_writer = imageio.get_writer(output_file_path, fps=int(fps))
 
         # Write each frame in annotated_panoramas to the video file
         for i in range(int(total_num_frames)):
@@ -153,7 +153,8 @@ def video_detection(input_video_path, stereographic_image_size, FOV, output_file
             video_writer.write(output_image)
 
         # Close the video_writer object when finished
-        video_writer.close()
+        video_writer.release()
+        # video_writer.close()
         print("The annotated 360 video file has been written successfully.")
 
 
