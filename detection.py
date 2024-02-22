@@ -96,6 +96,7 @@ def video_detection(input_video_path, stereographic_image_size, FOV, output_file
 
     # if only one thread, run it on the current thread without using the multithread manager
     if thread_count == 1:
+        print("Processing frames")
         for frame_count in tqdm(range(int(total_num_frames))):
             ret, pano_array = video_reader.read() # pano_array written in BGR format
             if ret is None:
@@ -110,6 +111,7 @@ def video_detection(input_video_path, stereographic_image_size, FOV, output_file
     
     # Otherwise, run it with the multithread manager
     elif thread_count > 1:
+        print("Processing frames")
         # Create the multithread manager and specify the number of threads in use
         with ThreadPoolExecutor(max_workers=thread_count) as executor:
             futures = queue.Queue()
@@ -148,7 +150,8 @@ def video_detection(input_video_path, stereographic_image_size, FOV, output_file
         video_writer = imageio.get_writer(output_file_path, fps=int(fps))
 
         # Write each frame in annotated_panoramas to the video file
-        for i in range(int(total_num_frames)):
+        print("Writing frames")
+        for i in tqdm(range(int(total_num_frames))):
             output_image = annotated_panoramas[i]
             # video_writer.write(output_image)
             rgb_image = cv2.cvtColor(output_image, cv2.COLOR_BGR2RGB)
