@@ -22,7 +22,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 
 
-def video_detection(input_video_path, stereographic_image_size, FOV, output_file_path, thread_count):
+def video_detection(input_video_path, stereographic_image_size, FOV, output_file_path, thread_count, seconds_process=-1):
     '''
     Function:
         Take in a set of equirectangular panoramas (360-degree video) and apply object detection.
@@ -52,8 +52,9 @@ def video_detection(input_video_path, stereographic_image_size, FOV, output_file
 
     fps = video_reader.get(cv2.CAP_PROP_FPS)
     total_num_frames = video_reader.get(cv2.CAP_PROP_FRAME_COUNT)
-    # Testing
-    total_num_frames = 300
+    frames_specified = seconds_process * int(fps)
+    if frames_specified > 0:
+        total_num_frames = frames_specified
     print("Frame Rate: ", fps)
     print("Total number of frames: ", total_num_frames)
 
@@ -131,7 +132,6 @@ def video_detection(input_video_path, stereographic_image_size, FOV, output_file
     while futures.qsize() > 0:
         future = futures.get()
         output_panorama_np, fr_index, code = future.result()  # This line will block until the future is done
-        print(output_panorama_np.shape)
         if code != 0:
             print(f"Task failed, code: {code}")
         else:
@@ -143,18 +143,20 @@ def video_detection(input_video_path, stereographic_image_size, FOV, output_file
     # Store the panorama image with bounding boxes
     if output_file_path:
         # Defining codec and creating video_writer object
-        fourcc = cv2.VideoWriter_fourcc(*'X264')
-        video_writer = cv2.VideoWriter(output_file_path, fourcc, int(fps), (annotated_panoramas[0].shape[1], annotated_panoramas[0].shape[0]))
-        # video_writer = imageio.get_writer(output_file_path, fps=int(fps))
+        # fourcc = cv2.VideoWriter_fourcc(*'X264')
+        # video_writer = cv2.VideoWriter(output_file_path, fourcc, int(fps), (annotated_panoramas[0].shape[1], annotated_panoramas[0].shape[0]))
+        video_writer = imageio.get_writer(output_file_path, fps=int(fps))
 
         # Write each frame in annotated_panoramas to the video file
         for i in range(int(total_num_frames)):
             output_image = annotated_panoramas[i]
-            video_writer.write(output_image)
+            # video_writer.write(output_image)
+            rgb_image = cv2.cvtColor(output_image, cv2.COLOR_BGR2RGB)
+            video_writer.append_data(rgb_image)
 
         # Close the video_writer object when finished
-        video_writer.release()
-        # video_writer.close()
+        # video_writer.release()
+        video_writer.close()
         print("The annotated 360 video file has been written successfully.")
 
 
@@ -229,6 +231,7 @@ def main():
     parser.add_argument("--FOV", help="", default="180x180")
     parser.add_argument("--output", help="Path to output image.", default=None)
     parser.add_argument("--threads", type=int, help="Number of threads for parallelization (video only)", default=1)
+    parser.add_argument("--seconds_process", type=int, help="Number of seconds in the video (from the start) to process", default=-1)
     args = parser.parse_args()
 
     # Set variable values
@@ -245,6 +248,7 @@ def main():
 
     output_file_path = args.output
     thread_count = args.threads
+    seconds_process = args.seconds_process
 
     if thread_count < 1:
         raise argparse.ArgumentTypeError("thread_count must be an integer greater than zero.")
@@ -252,7 +256,7 @@ def main():
 
     if args.video:
         input_video_path = args.video
-        video_detection(input_video_path, stereographic_image_size, FOV, output_file_path, thread_count)
+        video_detection(input_video_path, stereographic_image_size, FOV, output_file_path, thread_count, seconds_process)
     elif args.img:
         input_panorama_path = args.img
         image_detection(input_panorama_path, stereographic_image_size, FOV, output_file_path)
