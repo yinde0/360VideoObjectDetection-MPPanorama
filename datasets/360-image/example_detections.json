@@ -1,0 +1,67 @@
+[
+    {
+        "class_id": 57,
+        "class_name": "couch",
+        "confidence": 0.9160597324371338,
+        "box": [
+            3678,
+            1764,
+            1481,
+            609
+        ],
+        "scale": 1.0,
+        "dist_from_center": 0.2364015558157754
+    },
+    {
+        "class_id": 56,
+        "class_name": "chair",
+        "confidence": 0.5808002352714539,
+        "box": [
+            4861,
+            1868,
+            1232,
+            857
+        ],
+        "scale": 1.0,
+        "dist_from_center": 0.36649860951522756
+    },
+    {
+        "class_id": 62,
+        "class_name": "tv",
+        "confidence": 0.8111829161643982,
+        "box": [
+            1727,
+            1688,
+            555,
+            354
+        ],
+        "scale": 1.0,
+        "dist_from_center": 0.22027179170130978
+    },
+    {
+        "class_id": 0,
+        "class_name": "person",
+        "confidence": 0.8589282035827637,
+        "box": [
+            2584,
+            1292,
+            382,
+            930
+        ],
+        "scale": 1.0,
+        "dist_from_center": 0.12664354339635905
+    },
+    {
+        "class_id": 56,
+        "class_name": "chair",
+        "confidence": 0.6581999659538269,
+        "box": [
+            3330,
+            1612,
+            201,
+            204
+        ],
+        "scale": 1.0,
+        "dist_from_center": 0.16058878520157874
+    }
+]

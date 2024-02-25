@@ -14,6 +14,7 @@ import queue
 import sys
 import cv2
 import imageio
+import json
 import numpy as np
 from yolov8_model_run import detect
 from stereo import panorama_to_stereo_multiprojections, stereo_bounding_boxes_to_panorama
@@ -22,7 +23,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 
 
-def video_detection(input_video_path, stereographic_image_size, FOV, output_file_path, thread_count, seconds_process=-1):
+def video_detection(input_video_path, stereographic_image_size, FOV, output_image_file_path, output_json_file_path, thread_count, seconds_process=-1):
     '''
     Function:
         Take in a set of equirectangular panoramas (360-degree video) and apply object detection.
@@ -49,6 +50,7 @@ def video_detection(input_video_path, stereographic_image_size, FOV, output_file
         exit()
 
     annotated_panoramas = {}
+    panorama_detections = {}
 
     fps = video_reader.get(cv2.CAP_PROP_FPS)
     total_num_frames = video_reader.get(cv2.CAP_PROP_FRAME_COUNT)
@@ -88,10 +90,10 @@ def video_detection(input_video_path, stereographic_image_size, FOV, output_file
         frames_detections_with_meta_np = np.array(frames_detections_with_meta, dtype=np.dtype([('image_detections', np.ndarray), ('yaw', int), ('pitch', int)]))
         
         # Add the bounding boxes from the stereographic projection frames to the original panorama and return the annotated np.ndarray
-        output_panorama_np = stereo_bounding_boxes_to_panorama(frames_detections_with_meta_np, pano_array, stereographic_image_size, FOV)
+        output_panorama_np, pano_detections = stereo_bounding_boxes_to_panorama(frames_detections_with_meta_np, pano_array, stereographic_image_size, FOV)
 
         # Successful return
-        return (output_panorama_np, frame_count, 0)
+        return (output_panorama_np, pano_detections, frame_count, 0)
 
 
     # if only one thread, run it on the current thread without using the multithread manager
@@ -103,11 +105,12 @@ def video_detection(input_video_path, stereographic_image_size, FOV, output_file
                 print("Finished reading all frames before expected")
                 break
 
-            output_panorama_np, fr_index, code = process_frame(frame_count, pano_array, stereographic_image_size, FOV)
+            output_panorama_np, pano_detections, fr_index, code = process_frame(frame_count, pano_array, stereographic_image_size, FOV)
             if code != 0:
                 print(f"Task failed, code: {code}")
             else:
                 annotated_panoramas[fr_index] = output_panorama_np
+                panorama_detections[fr_index] = pano_detections
     
     # Otherwise, run it with the multithread manager
     elif thread_count > 1:
@@ -125,29 +128,48 @@ def video_detection(input_video_path, stereographic_image_size, FOV, output_file
                 futures.put(future)
                 while futures.qsize() > thread_count * 2:
                     future = futures.get()
-                    output_panorama_np, fr_index, code = future.result()  # This line will block until the future is done
+                    output_panorama_np, pano_detections, fr_index, code = future.result()  # This line will block until the future is done
                     if code != 0:
                         print(f"Task failed, code: {code}")
                     else:
                         annotated_panoramas[fr_index] = output_panorama_np
+                        panorama_detections[fr_index] = pano_detections
     
     while futures.qsize() > 0:
         future = futures.get()
-        output_panorama_np, fr_index, code = future.result()  # This line will block until the future is done
+        output_panorama_np, pano_detections, fr_index, code = future.result()  # This line will block until the future is done
         if code != 0:
             print(f"Task failed, code: {code}")
         else:
             annotated_panoramas[fr_index] = output_panorama_np
+            panorama_detections[fr_index] = pano_detections
 
     # Release video reader object
     video_reader.release()
 
+    json_pano_detections = {}
+    for fr_index in panorama_detections:
+        json_pano_detection = []
+        for detection_index in range(panorama_detections[fr_index].shape[0]):
+            for detection in range(len(panorama_detections[fr_index][detection_index])):
+                json_pano_detection.append(panorama_detections[fr_index][detection_index][detection])
+        json_pano_detections[fr_index] = json_pano_detection
+
+    # Store the panorama detections in a JSON file
+    if output_json_file_path:
+        # Serializing json
+        json_object = json.dumps(json_pano_detections, indent=4)
+        
+        # Writing to output_json_file_path
+        with open(output_json_file_path, "w") as outfile:
+            outfile.write(json_object)
+
     # Store the panorama image with bounding boxes
-    if output_file_path:
+    if output_image_file_path:
         # Defining codec and creating video_writer object
         # fourcc = cv2.VideoWriter_fourcc(*'X264')
         # video_writer = cv2.VideoWriter(output_file_path, fourcc, int(fps), (annotated_panoramas[0].shape[1], annotated_panoramas[0].shape[0]))
-        video_writer = imageio.get_writer(output_file_path, fps=int(fps))
+        video_writer = imageio.get_writer(output_image_file_path, fps=int(fps))
 
         # Write each frame in annotated_panoramas to the video file
         print("Writing frames")
@@ -165,7 +187,7 @@ def video_detection(input_video_path, stereographic_image_size, FOV, output_file
 
     
 
-def image_detection(input_panorama_path, stereographic_image_size, FOV, output_file_path):
+def image_detection(input_panorama_path, stereographic_image_size, FOV, output_image_file_path, output_json_file_path):
     '''
     Function:
         Take in an equirectangular panorama (360 image) and apply object detection.
@@ -219,11 +241,24 @@ def image_detection(input_panorama_path, stereographic_image_size, FOV, output_f
     frames_detections_with_meta_np = np.array(frames_detections_with_meta, dtype=np.dtype([('image_detections', np.ndarray), ('yaw', int), ('pitch', int)]))
     
     # Add the bounding boxes from the stereographic projection frames to the original panorama and return the annotated np.ndarray
-    output_panorama_np = stereo_bounding_boxes_to_panorama(frames_detections_with_meta_np, pano_array, stereographic_image_size, FOV)
+    output_panorama_np, panorama_detections = stereo_bounding_boxes_to_panorama(frames_detections_with_meta_np, pano_array, stereographic_image_size, FOV)
 
+    print(panorama_detections)
+    json_pano_detections = []
+    for detection_index in range(panorama_detections.shape[0]):
+        json_pano_detections.append(panorama_detections[detection_index][0])
+    # Store the panorama detections in an JSON file
+    if output_json_file_path:
+        # Serializing json
+        json_object = json.dumps(json_pano_detections, indent=4)
+        
+        # Writing to output_json_file_path
+        with open(output_json_file_path, "w") as outfile:
+            outfile.write(json_object)
+        
     # Store the panorama image with bounding boxes
-    if output_file_path:
-        cv2.imwrite(output_file_path, output_panorama_np)
+    if output_image_file_path:
+        cv2.imwrite(output_image_file_path, output_panorama_np)
 
 def main():
     parser = argparse.ArgumentParser()
@@ -232,7 +267,8 @@ def main():
     parser.add_argument("--img", help="Path to input 360 image.")
     parser.add_argument("--stereo_image_size", help="The size in pixels of the stereographic images derived from the panorama", default="640x640")
     parser.add_argument("--FOV", help="", default="180x180")
-    parser.add_argument("--output", help="Path to output image.", default=None)
+    parser.add_argument("--output_detections", help="Path to output json file for the detections.", default=None)
+    parser.add_argument("--output_frames", help="Path to output frame(s).", default=None)
     parser.add_argument("--threads", type=int, help="Number of threads for parallelization (video only)", default=1)
     parser.add_argument("--seconds_process", type=int, help="Number of seconds in the video (from the start) to process", default=-1)
     args = parser.parse_args()
@@ -249,7 +285,8 @@ def main():
     except ValueError:
         raise argparse.ArgumentTypeError("FOV Angles must be ThetaxPhi, where Theta and Phi are integers. See stereo.py description for specifics on angles.")
 
-    output_file_path = args.output
+    output_image_file_path = args.output_frames
+    output_json_file_path = args.output_detections
     thread_count = args.threads
     seconds_process = args.seconds_process
 
@@ -259,10 +296,10 @@ def main():
 
     if args.video:
         input_video_path = args.video
-        video_detection(input_video_path, stereographic_image_size, FOV, output_file_path, thread_count, seconds_process)
+        video_detection(input_video_path, stereographic_image_size, FOV, output_image_file_path, output_json_file_path, thread_count, seconds_process)
     elif args.img:
         input_panorama_path = args.img
-        image_detection(input_panorama_path, stereographic_image_size, FOV, output_file_path)
+        image_detection(input_panorama_path, stereographic_image_size, FOV, output_image_file_path, output_json_file_path)
 
     
 

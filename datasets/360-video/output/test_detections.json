@@ -1,0 +1,996 @@
+{
+    "0": [
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.653243899345398,
+            "box": [
+                1301,
+                990,
+                411,
+                373
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.2735858537135093
+        },
+        {
+            "class_id": 56,
+            "class_name": "chair",
+            "confidence": 0.612007200717926,
+            "box": [
+                1214,
+                1013,
+                368,
+                379
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.3444677871338577
+        },
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.5894357562065125,
+            "box": [
+                1622,
+                971,
+                404,
+                471
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.15873242006443797
+        }
+    ],
+    "1": [
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.7250615954399109,
+            "box": [
+                1611,
+                972,
+                414,
+                469
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.15967976071349899
+        },
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.6406981348991394,
+            "box": [
+                1302,
+                989,
+                406,
+                371
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.2741347859245806
+        }
+    ],
+    "2": [
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.7141817808151245,
+            "box": [
+                1612,
+                972,
+                413,
+                469
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.1596338512389151
+        },
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.6479885578155518,
+            "box": [
+                1302,
+                989,
+                405,
+                372
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.2744350939273247
+        }
+    ],
+    "3": [
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.7148038148880005,
+            "box": [
+                1612,
+                972,
+                414,
+                469
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.15959334416683332
+        },
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.6362824440002441,
+            "box": [
+                1302,
+                989,
+                404,
+                371
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.2745430414862845
+        }
+    ],
+    "4": [
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.7730152606964111,
+            "box": [
+                1611,
+                972,
+                417,
+                470
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.15977035639657072
+        },
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.6245519518852234,
+            "box": [
+                1303,
+                989,
+                397,
+                367
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.27569231565146907
+        },
+        {
+            "class_id": 56,
+            "class_name": "chair",
+            "confidence": 0.4784426987171173,
+            "box": [
+                1220,
+                1028,
+                361,
+                363
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.3451575049525775
+        }
+    ],
+    "5": [
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.7777544260025024,
+            "box": [
+                1611,
+                972,
+                417,
+                470
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.15982961389523093
+        },
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.6327475905418396,
+            "box": [
+                1302,
+                989,
+                397,
+                369
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.2761542954150263
+        },
+        {
+            "class_id": 56,
+            "class_name": "chair",
+            "confidence": 0.492244154214859,
+            "box": [
+                1219,
+                1028,
+                361,
+                363
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.34537678220642865
+        }
+    ],
+    "6": [
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.7780002355575562,
+            "box": [
+                1611,
+                972,
+                417,
+                470
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.1598235811310828
+        },
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.6325904130935669,
+            "box": [
+                1302,
+                989,
+                397,
+                369
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.2761381072904405
+        },
+        {
+            "class_id": 56,
+            "class_name": "chair",
+            "confidence": 0.4944467544555664,
+            "box": [
+                1220,
+                1028,
+                360,
+                363
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.34530383303665974
+        }
+    ],
+    "7": [
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.7778022885322571,
+            "box": [
+                1611,
+                972,
+                417,
+                470
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.15982004307470798
+        },
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.6326550245285034,
+            "box": [
+                1302,
+                989,
+                397,
+                369
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.27613771263282244
+        },
+        {
+            "class_id": 56,
+            "class_name": "chair",
+            "confidence": 0.49798181653022766,
+            "box": [
+                1220,
+                1028,
+                360,
+                363
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.3452429263420663
+        }
+    ],
+    "8": [
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.7785143852233887,
+            "box": [
+                1611,
+                972,
+                417,
+                470
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.15982244449545843
+        },
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.6344877481460571,
+            "box": [
+                1302,
+                989,
+                397,
+                369
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.27642884055102807
+        },
+        {
+            "class_id": 56,
+            "class_name": "chair",
+            "confidence": 0.48358482122421265,
+            "box": [
+                1219,
+                1028,
+                361,
+                363
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.3456952940646792
+        }
+    ],
+    "9": [
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.7674339413642883,
+            "box": [
+                1614,
+                972,
+                414,
+                470
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.15955484672049827
+        },
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.6427832245826721,
+            "box": [
+                1304,
+                990,
+                391,
+                364
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.2767471624336101
+        },
+        {
+            "class_id": 56,
+            "class_name": "chair",
+            "confidence": 0.473490834236145,
+            "box": [
+                1217,
+                1028,
+                363,
+                363
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.3462735353712987
+        }
+    ],
+    "10": [
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.7707868218421936,
+            "box": [
+                1614,
+                972,
+                414,
+                470
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.15957737281292572
+        },
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.646915078163147,
+            "box": [
+                1304,
+                990,
+                391,
+                364
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.2767708634434966
+        },
+        {
+            "class_id": 56,
+            "class_name": "chair",
+            "confidence": 0.4624495804309845,
+            "box": [
+                1217,
+                1028,
+                363,
+                363
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.3461971114711901
+        }
+    ],
+    "11": [
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.7672361135482788,
+            "box": [
+                1614,
+                972,
+                414,
+                470
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.1595489174043179
+        },
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.6456229090690613,
+            "box": [
+                1304,
+                990,
+                391,
+                365
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.27703143940552605
+        },
+        {
+            "class_id": 56,
+            "class_name": "chair",
+            "confidence": 0.4844103455543518,
+            "box": [
+                1217,
+                1028,
+                363,
+                363
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.34621236288602925
+        }
+    ],
+    "12": [
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.7700698971748352,
+            "box": [
+                1615,
+                972,
+                411,
+                469
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.15946961174068766
+        },
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.6946361660957336,
+            "box": [
+                1304,
+                991,
+                389,
+                363
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.2775262549188113
+        },
+        {
+            "class_id": 56,
+            "class_name": "chair",
+            "confidence": 0.47899219393730164,
+            "box": [
+                1219,
+                1028,
+                361,
+                362
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.3456028236988183
+        }
+    ],
+    "13": [
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.7669505476951599,
+            "box": [
+                1614,
+                972,
+                413,
+                469
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.15948474862234777
+        },
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.6915896534919739,
+            "box": [
+                1303,
+                990,
+                390,
+                365
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.27753912576022616
+        },
+        {
+            "class_id": 56,
+            "class_name": "chair",
+            "confidence": 0.47064846754074097,
+            "box": [
+                1220,
+                1028,
+                360,
+                362
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.3452052851186088
+        }
+    ],
+    "14": [
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.7672761082649231,
+            "box": [
+                1614,
+                972,
+                413,
+                469
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.15948630829527874
+        },
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.6887568235397339,
+            "box": [
+                1303,
+                990,
+                390,
+                365
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.2776584250788077
+        },
+        {
+            "class_id": 56,
+            "class_name": "chair",
+            "confidence": 0.47404786944389343,
+            "box": [
+                1220,
+                1028,
+                360,
+                362
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.34532535268252335
+        }
+    ],
+    "15": [
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.7668561935424805,
+            "box": [
+                1614,
+                972,
+                412,
+                469
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.15946890938960062
+        },
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.6871393918991089,
+            "box": [
+                1303,
+                991,
+                390,
+                364
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.27759138368459296
+        },
+        {
+            "class_id": 56,
+            "class_name": "chair",
+            "confidence": 0.4773947596549988,
+            "box": [
+                1220,
+                1028,
+                360,
+                362
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.34511883308973373
+        }
+    ],
+    "16": [
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.7526358366012573,
+            "box": [
+                1613,
+                972,
+                412,
+                469
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.15960800775028372
+        },
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.6905732750892639,
+            "box": [
+                1304,
+                991,
+                388,
+                362
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.27753209129532674
+        },
+        {
+            "class_id": 56,
+            "class_name": "chair",
+            "confidence": 0.4823688566684723,
+            "box": [
+                1221,
+                1027,
+                359,
+                363
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.3446619483974159
+        }
+    ],
+    "17": [
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.7587049007415771,
+            "box": [
+                1613,
+                972,
+                413,
+                469
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.15960437683129305
+        },
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.6916525959968567,
+            "box": [
+                1304,
+                991,
+                388,
+                362
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.2774652843465531
+        }
+    ],
+    "18": [
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.7581357359886169,
+            "box": [
+                1613,
+                972,
+                413,
+                469
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.15957312328567205
+        },
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.6969293355941772,
+            "box": [
+                1304,
+                990,
+                388,
+                362
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.27738410785372614
+        }
+    ],
+    "19": [
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.7533231973648071,
+            "box": [
+                1613,
+                972,
+                413,
+                469
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.15959361157636942
+        },
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.690024197101593,
+            "box": [
+                1304,
+                991,
+                388,
+                362
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.2774981982442101
+        }
+    ],
+    "20": [
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.7578620314598083,
+            "box": [
+                1612,
+                972,
+                413,
+                469
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.15982023213244145
+        },
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.6819444298744202,
+            "box": [
+                1302,
+                989,
+                395,
+                368
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.2768225636648447
+        }
+    ],
+    "21": [
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.755702555179596,
+            "box": [
+                1611,
+                972,
+                414,
+                469
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.15990315270786498
+        },
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.6580705046653748,
+            "box": [
+                1302,
+                989,
+                397,
+                367
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.2761273830287392
+        }
+    ],
+    "22": [
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.7559095621109009,
+            "box": [
+                1611,
+                972,
+                414,
+                469
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.15989931834258295
+        },
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.6582880616188049,
+            "box": [
+                1302,
+                989,
+                397,
+                368
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.27614365468264873
+        }
+    ],
+    "23": [
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.7569648027420044,
+            "box": [
+                1611,
+                972,
+                414,
+                469
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.15992085142345933
+        },
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.659031093120575,
+            "box": [
+                1302,
+                989,
+                397,
+                368
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.2761990104007902
+        }
+    ],
+    "24": [
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.7666751146316528,
+            "box": [
+                1610,
+                973,
+                415,
+                468
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.15995168992242395
+        },
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.6520786285400391,
+            "box": [
+                1302,
+                989,
+                398,
+                368
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.27605663015829296
+        }
+    ],
+    "25": [
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.7631593346595764,
+            "box": [
+                1610,
+                973,
+                416,
+                468
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.15999511003978567
+        },
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.6688158512115479,
+            "box": [
+                1302,
+                989,
+                396,
+                370
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.2767968674323574
+        }
+    ],
+    "26": [
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.7632412314414978,
+            "box": [
+                1610,
+                973,
+                416,
+                468
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.15998289942757793
+        },
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.6671240329742432,
+            "box": [
+                1302,
+                989,
+                396,
+                369
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.2767470332385822
+        }
+    ],
+    "27": [
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.7631204724311829,
+            "box": [
+                1610,
+                973,
+                416,
+                468
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.16000109107716778
+        },
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.6654475331306458,
+            "box": [
+                1302,
+                989,
+                396,
+                369
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.2766280287550891
+        }
+    ],
+    "28": [
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.7680280208587646,
+            "box": [
+                1610,
+                973,
+                416,
+                468
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.15997744669227293
+        },
+        {
+            "class_id": 0,
+            "class_name": "person",
+            "confidence": 0.6651738286018372,
+            "box": [
+                1302,
+                989,
+                396,
+                368
+            ],
+            "scale": 1.0,
+            "dist_from_center": 0.2766681855567311
+        }
+    ]
+}

@@ -477,7 +477,7 @@ def stereo_bounding_boxes_to_panorama(frame_detections_with_meta, panorama, ster
 
 
     # Return the final annotated pano_array
-    return pano_array
+    return pano_array, pano_detections_post_nms
 
 
 
