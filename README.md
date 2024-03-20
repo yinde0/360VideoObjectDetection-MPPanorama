@@ -1,5 +1,5 @@
 # Multi-Projection YOLO
-Imrpoving object detection for 360 degree videos. Modifying based on method outlined in 'Object Detection in Equirectangular Panorama' (2018 ICPR) (https://arxiv.org/abs/1805.08009).
+Improving object detection for 360 degree videos. Modifying based on method outlined in 'Object Detection in Equirectangular Panorama' (2018 ICPR) (https://arxiv.org/abs/1805.08009).
 
 # Set Up
 ```
