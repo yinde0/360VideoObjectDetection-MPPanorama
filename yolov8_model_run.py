@@ -14,7 +14,7 @@ CLASSES = yaml_load(check_yaml("coco128.yaml"))["names"]
 colors = np.random.uniform(0, 255, size=(len(CLASSES), 3))
 
 
-def detect(input_array, confidence_threshold=0.40, onnx_model="360VideoObjectDetection-MPPanorama\\model-runs\\detect\\train\\weights\\yolov8n.onnx"):
+def detect(input_array, confidence_threshold=0.40, onnx_model="./360VideoObjectDetection-MPPanorama/model-runs/detect/train/weights/yolov8n.onnx"):
     """
     Function:
     Load ONNX model, perform inference, draw bounding boxes, and display the output image.
